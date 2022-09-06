@@ -32,7 +32,16 @@
 
                     </ul>
 
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="float:right; margin-top:10px;">
+                        @csrf
+                        <button type="submit" class="btn btn-warning btn-sm pull-right">Logout</button>
+                    </form>
                 </div>
+
+
+
+
+
             </div>
         </nav>
 
