@@ -43,6 +43,17 @@ return [
 
     'debug' => (bool) env('APP_DEBUG', false),
 
+    'debug_hide' => [
+        '_COOKIE' => array_keys($_COOKIE),
+        '_SERVER' => array_keys($_SERVER),
+        '_ENV' => array_keys($_ENV),
+        '_POST' => [
+            'password',
+            'sin',
+            'captcha'
+        ],
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application URL
@@ -215,5 +226,6 @@ return [
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         'InterventionImage' => Intervention\Image\Facades\Image::class,
     ])->toArray(),
+
 
 ];
