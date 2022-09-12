@@ -31,9 +31,12 @@ class HomeController extends Controller
      */
     public function index()
     {
-      $inventory = Inventory::with(['images'])->orderBy('created_at', 'desc')->paginate(10);
+        $inventory = Inventory::with(['images'])
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(10);
 
-      return view('dashboard', ['inventory' => $inventory]);
+        return view('dashboard', ['inventory' => $inventory]);
     }
 
     /**
@@ -62,7 +65,7 @@ class HomeController extends Controller
     {
       // Fill vehicle
   		$vehicle = new Inventory;
-      $vehicle->fill(request()->except('images'));
+        $vehicle->fill(request()->except('images'));
   		// Save vehcile
   		if(! $vehicle->save()){
   			// Return error is save didnt work
@@ -205,47 +208,57 @@ class HomeController extends Controller
 
     public function importXls(Request $request)
     {
-      $file = $request->xls;
-      $row = 1;
-      $array = [];
-      $vehicleCache = [];
+        $file = $request->xls;
+        $row = 1;
+        $array = [];
+        $vehicleCache = [];
 
-      if (($handle = fopen($file, "r")) !== FALSE) {
-       while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-         $num = count($data);
-         $row++;
-         $array = [];
-         for ($c=0; $c < $num; $c++) {
-            $array[] =  $data[$c];
-         }
-          $vehicleCache[] =  $array;
-       }
-       fclose($handle);
-      }
+        if (($handle = fopen($file, "r")) !== FALSE) {
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
 
-      // Remove header array
-      $headers = array_shift($vehicleCache);
+                $num = count($data);
+                $row++;
+                $array = [];
 
-      forEach($vehicleCache as $row){
-        if($row[29] == 'Y'){
-          Inventory::firstOrCreate(['stock_num' => $row[17]],
-            [
-              'stock_num' => $row[17],
-              //'vin' => $row[1],
-              'year' => $row[8],
-              'make' => $row[16],
-              'model' => $row[14],
-              'trim' => $row[11],
-              'kms' => $row[20],
-              'title' => $row[34],
-              'trans' => $row[12],
-              'ad_num' => $row[33],
-              'price' => $row[13],
-            ]
-          );
+                for ($c=0; $c < $num; $c++) {
+                    $array[] =  $data[$c];
+                }
+
+                $vehicleCache[] =  $array;
+            }
+            fclose($handle);
         }
-      }
 
-      return redirect('/dashboard')->with('success', 'Spread sheet has been imported!');
+        // Remove header array
+        $headers = array_shift($vehicleCache);
+
+        forEach($vehicleCache as $row){
+            if($row[29] == 'Y'){
+
+                $vehicle = Inventory::where('stock_num', $row[17])->exists();
+
+                if(! $vehicle){
+                    Inventory::create([
+                          'stock_num' => $row[17],
+                          'year' => $row[8],
+                          'make' => $row[16],
+                          'model' => $row[14],
+                          'trim' => $row[11],
+                          'kms' => $row[20],
+                          'title' => $row[34],
+                          'trans' => $row[12],
+                          'ad_num' => $row[33],
+                          'price' => $row[13]
+                    ]);
+                } else {
+                    Inventory::where('stock_num', $row[17])->update([
+                        'title' => $row[34],
+                         'price' => $row[13]
+                    ]);
+                }
+            }
+        }
+
+        return redirect('/dashboard')->with('success', 'Spread sheet has been imported!');
     }
 }

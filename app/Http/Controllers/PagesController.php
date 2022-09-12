@@ -26,17 +26,17 @@ class PagesController extends Controller
       return view('welcome', ['inventory' => $inventory, 'makes' => $uniqueMakes]);
     }
 
-    /*
-     * SEND CONTACT FORM
-    */
     public function inventory()
     {
-      $inventory = Inventory::with(['images'])->orderBy('year', 'desc')->paginate(10);
+        $inventory = Inventory::with(['images'])
+            ->orderBy('year', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(10);
 
-      $uniqueMakes = DB::table('inventory')
-                       ->select('make', DB::raw('count(*) as total'))
-                       ->groupBy('make')
-                       ->get();
+        $uniqueMakes = DB::table('inventory')
+            ->select('make', DB::raw('count(*) as total'))
+            ->groupBy('make')
+            ->get();
 
       return view('inventory', ['inventory' => $inventory, 'makes' => $uniqueMakes]);
     }
