@@ -117,22 +117,7 @@ class HomeController extends Controller
                 // save file name in the database
                 Image::create(['inventory_id' => $vehicle->id, 'src' => $name]);
             }
-          }// foreach
-          /*forEach($images as $img){
-            $name = uniqid() . '.' . $img->getClientOriginalExtension();
-            $targetPath = storage_path('app/public/images/');
-            // Store image
-            if($img->move($targetPath, $name)) {
-              // save file name in the database
-              Image::create(['inventory_id' => $vehicle->id, 'src' => $name]);
-              // Resize image
-              $image = InterventionImage::make($targetPath . $name);
-              $image->resize(1024, null, function ($constraint) {
-                $constraint->aspectRatio();
-              })->save($targetPath . $name);
-            }
-          }*/
-
+          }
         } else{
           return back()->with('error', 'Only 9 images per vehicle can be uploaded!')->withInput();
         }
@@ -145,40 +130,39 @@ class HomeController extends Controller
 
     public function removeVehicles(Request $request)
     {
-      forEach(request()->vehicles as $vhcId){
-        // Ensure key is a number
-        if(is_numeric($vhcId)){
+        forEach(request()->vehicles as $vhcId){
+            // Ensure key is a number
+            if(is_numeric($vhcId)){
 
-          $vhc = Inventory::with(['images'])->find($vhcId);
-          $vhcImages = $vhc->images;
+                $vhc = Inventory::with(['images'])->find($vhcId);
+                $vhcImages = $vhc->images;
 
-          // Remove vehicles images
-          forEach($vhcImages as $img){
-            // Save image src
-            $src = $img->src;
-            // Remove image db entry
-            if($img->delete()){
-              // Remove image from dir
-              if(!unlink(storage_path() . '/app/public/images/' . $src)){
-                // Return error
-                return back()->with('error', 'Problem unlinking image!');
-              }
-            } else{
-              // Return error
-              return back()->with('error', 'Problem removing image from db!');
+                // Remove vehicles images
+                forEach($vhcImages as $img){
+                    // Save image src
+                    $src = $img->src;
+                    // Remove image db entry
+                    if($img->delete()){
+                        // Remove image from directory
+                        if(file_exists(storage_path() . '/app/public/images/' . $src)){
+                            unlink(storage_path() . '/app/public/images/' . $src);
+                        }
+                    } else {
+                        // Return error
+                        return back()->with('error', 'Problem removing image from db!');
+                    }
+                }
+
+                // Remove vehicle db entry
+          		if(!$vhc->delete()){
+                    // Return success
+                    return back()->with('error', 'Problem removing vehicle from db!');
+          		}
             }
-          }
-
-          // Remove vehicle db entry
-      		if(!$vhc->delete()){
-            // Return success
-            return back()->with('error', 'Problem removing vehicle from db!');
-      		}
         }
-      }
 
-      // Success
-      return back()->with('success', 'Vehicles have been removed!');
+        // Success
+        return back()->with('success', 'Vehicles have been removed!');
     }
 
     public function removeImages(Request $request)
@@ -188,13 +172,12 @@ class HomeController extends Controller
       	if(is_numeric($imgId)){
       		// Find image
       		$img = Image::find($imgId);
-          $src = $img->src;
+            $src = $img->src;
       		// Remove image db entry
       		if($img->delete()){
             // Remove image from dir
-            if(!unlink(storage_path() . '/app/public/images/' . $src)){
-  		        // Return error
-  		        return back()->with('error', 'Problem unlinking image!');
+                if(file_exists(storage_path() . '/app/public/images/' . $src)){
+                    unlink(storage_path() . '/app/public/images/' . $src);
       			}
       		} else{
             // Return error

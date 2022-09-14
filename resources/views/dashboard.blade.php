@@ -5,7 +5,9 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">Dashboard</div>
+                <div class="card-header" style="margin-top:20px;">
+                    <h2>Dashboard</h2>
+                </div>
 
                 <div class="card-body">
                   @if(Session::has('success'))
@@ -21,7 +23,7 @@
 
                   <!-- UPLOAD CSV FILE -->
                   <div class="tab-pane">
-                    <h3>Upload Kijiji CSV File</h3>
+                    <h4>Upload Kijiji CSV File</h4>
                     <div class="lighter"><p>Export vehicles from Kijiji into .csv file (default option after update). No need to convert to .xlsx file anymore.</div>
 
                     <form method="POST" action="/import-xls" enctype="multipart/form-data">

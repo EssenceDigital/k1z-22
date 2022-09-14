@@ -14,7 +14,7 @@ class ImportDataSeeder extends Seeder
      */
     public function run()
     {
-        $sql = public_path('backup_data_962022.sql');
+        $sql = public_path('backup_data_9142022.sql');
 
         $db = [
             'username' => env('DB_USERNAME'),
